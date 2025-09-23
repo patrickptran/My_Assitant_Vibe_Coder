@@ -1,22 +1,12 @@
-"use client";
-import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { caller } from "@/trpc/server";
 
-const Page = () => {
-  const trpc = useTRPC();
-  const { data, error, isLoading } = useQuery(
-    trpc.createAI.queryOptions({ text: "My AI from tRPC" })
-  );
-
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+const Page = async () => {
+  const data = await caller.createAI({ text: "from server" });
+  console.log("data", data);
+  // you can also test this endpoint in the browser:
 
   // localhost:3000/trpc/createAI?body={text:"My AI from tRPC"}
-  return (
-    <div>
-      <h1>{JSON.stringify(data)}</h1>
-    </div>
-  );
+  return <div>{JSON.stringify(data)}</div>;
 };
 
 export default Page;

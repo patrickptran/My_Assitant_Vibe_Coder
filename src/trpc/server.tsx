@@ -17,3 +17,5 @@ export const trpc = createTRPCOptionsProxy({
 //    .fetch() calls, so we can use the same client for
 //    the whole request without worrying about sharing
 //    state between requests
+// ...
+export const caller = appRouter.createCaller(createTRPCContext);
