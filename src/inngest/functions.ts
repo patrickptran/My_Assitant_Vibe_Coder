@@ -3,6 +3,7 @@ import { inngest } from "./client";
 import { Sandbox } from "@e2b/code-interpreter";
 import { getSandbox } from "./utils";
 import { z } from "zod";
+import { PROMPT } from "../prompt";
 
 export const helloWorld = inngest.createFunction(
   { id: "hello-world" },
@@ -15,8 +16,7 @@ export const helloWorld = inngest.createFunction(
 
     const codeAgent = createAgent({
       name: "code Agent",
-      system:
-        "You are an expert TypeScript programmer. You write readable, maintainable code. You write simple Next.js snippets. You only respond with code, no explanations.",
+      system: PROMPT,
       model: openai({ model: "gpt-4o" }),
       tools: [
         createTool({
@@ -92,6 +92,22 @@ export const helloWorld = inngest.createFunction(
           parameters: z.object({
             paths: z.array(z.string()),
           }),
+          handler: async ({ files }, { step }) => {
+            return await step?.run("readFiles", async () => {
+              try {
+                const sandbox = await getSandbox(sandboxId);
+                const contents = [];
+                for (const file of files) {
+                  const content = await sandbox?.files.read(file);
+                  contents.push({ path: file, content });
+                }
+                return JSON.stringify(contents);
+              } catch (e) {
+                console.log("Error reading files", e);
+                return "Error reading files";
+              }
+            });
+          },
         }),
       ],
     });
